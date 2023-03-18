@@ -8,7 +8,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 const TabStyle = {
   maxWidth: 'inherit',
   minWidth: 'inherit',
-  fontSize: '0.6rem',
+  fontSize: '0.5rem',
 };
 
 const TabsStyle = {
