@@ -1,5 +1,6 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { RecoilRoot } from 'recoil';
 import RootLayout from './layouts/RootLayout';
 import Overview from './pages/Overview';
 import './App.css';
@@ -19,7 +20,7 @@ const router = createHashRouter([
   },
 ]);
 
-const darkTheme = createTheme({
+const theme = createTheme({
   palette: {
     mode: 'light',
   },
@@ -36,8 +37,10 @@ const darkTheme = createTheme({
 
 export default function App() {
   return (
-    <ThemeProvider theme={darkTheme}>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <RecoilRoot>
+      <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </RecoilRoot>
   );
 }
