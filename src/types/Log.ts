@@ -1,4 +1,4 @@
-import { ActionEnum } from 'renderer/enum/Action';
+import { ActionEnum } from '../enum/Action';
 
 interface ILog {
   time: Date;

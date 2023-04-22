@@ -1,5 +1,4 @@
 /* eslint-disable import/prefer-default-export */
-import { ActionEnum } from 'renderer/enum/Action';
 import {
   lightBlue,
   green,
@@ -8,6 +7,7 @@ import {
   pink,
   grey,
 } from '@mui/material/colors';
+import { ActionEnum } from '../../enum/Action';
 
 function getActionColor(action: ActionEnum): { [key: number]: string } {
   switch (action) {

@@ -1,6 +1,5 @@
-import { atom } from 'recoil';
-import { IDevice } from 'renderer/types/Device';
-import { ToolEnum } from '../enum/Tool';
+import { ToolEnum } from '../../enum/Tool';
+import { IDevice } from '../../types/Device';
 
 const DeviceList: IDevice[] = [
   {
@@ -10,6 +9,8 @@ const DeviceList: IDevice[] = [
     tester: 'One port',
     capacity: '512G',
     feature: 'HMB,pyrite',
+    fwVersion: 'abc12345',
+    fwMinor: '0000',
     extensionInfo: {
       tool: ToolEnum.PPS,
       pattern: 'PP0001_0005_Testing_Some_Funtcion_And_DoSomething',
@@ -29,6 +30,8 @@ const DeviceList: IDevice[] = [
     status: 'testing',
     tester: 'T board',
     capacity: '1024G',
+    fwVersion: 'qwe12345',
+    fwMinor: '0000',
     feature: 'HMB,Opal',
     extensionInfo: {
       tool: ToolEnum.PPS,
@@ -49,6 +52,8 @@ const DeviceList: IDevice[] = [
     status: 'testing',
     tester: 'T board',
     capacity: '2048G',
+    fwVersion: 'ggg12345',
+    fwMinor: '0000',
     feature: 'HMB,Opal',
     extensionInfo: {
       tool: ToolEnum.PPS,
@@ -69,6 +74,8 @@ const DeviceList: IDevice[] = [
     status: 'testing',
     tester: 'T board',
     capacity: '1024G',
+    fwVersion: 'xxx12345',
+    fwMinor: '0000',
     feature: 'HMB,Opal',
     extensionInfo: {
       tool: ToolEnum.PPS,
@@ -85,9 +92,4 @@ const DeviceList: IDevice[] = [
   },
 ];
 
-const DeviceListState = atom<IDevice[]>({
-  key: 'deviceList',
-  default: [...DeviceList],
-});
-
-export default DeviceListState;
+export default DeviceList;

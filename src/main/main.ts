@@ -12,8 +12,15 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import ILog from 'types/Log';
+import moment from 'moment';
+import net from 'net';
+import ISqliteHandler from 'types/SqliteHandler';
+import { ActionEnum } from '../enum/Action';
+import DeviceList from './data/Devices';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import SqliteHandler from './handlers/SqliteHandler';
 
 class AppUpdater {
   constructor() {
@@ -36,7 +43,8 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-const isDebug = process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const isDebug =
+  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 if (isDebug) {
   require('electron-debug')();
@@ -60,7 +68,9 @@ const createWindow = async () => {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(__dirname, '../../assets');
+  const RESOURCES_PATH = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets')
+    : path.join(__dirname, '../../assets');
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -72,7 +82,9 @@ const createWindow = async () => {
     height: 728,
     icon: getAssetPath('icon.png'),
     webPreferences: {
-      preload: app.isPackaged ? path.join(__dirname, 'preload.js') : path.join(__dirname, '../../.erb/dll/preload.js'),
+      preload: app.isPackaged
+        ? path.join(__dirname, 'preload.js')
+        : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
 
@@ -110,6 +122,112 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
+let server: net.Server;
+ipcMain.on('inital', async () => {
+  // inital sqlite
+  mainWindow?.webContents.send('system-message', {
+    time: moment().toDate(),
+    messgae: '(main process) inital sqlite db',
+    level: ActionEnum.Info,
+  } as ILog);
+  const sqliteAbsPath = path.join(__dirname, './data', 'db.sqlite');
+  const dbHandler: ISqliteHandler = new SqliteHandler(sqliteAbsPath);
+  await dbHandler.createTable();
+
+  // scan device
+  mainWindow?.webContents.send('system-message', {
+    time: moment().toDate(),
+    messgae: '(main process) start scan deivce',
+    level: ActionEnum.Info,
+  } as ILog);
+
+  // pending 5s
+  function sleep(ms: number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+  await sleep(5 * 1000);
+  mainWindow?.webContents.send('inital-dev', DeviceList.slice(0, 1));
+
+  mainWindow?.webContents.send('system-message', {
+    time: moment().toDate(),
+    messgae: '(main process) scan deivce success',
+    level: ActionEnum.Success,
+  } as ILog);
+
+  mainWindow?.webContents.send('system-message', {
+    time: moment().toDate(),
+    messgae: '(main process) enable tcp/ip server',
+    level: ActionEnum.Info,
+  } as ILog);
+
+  // tcp server
+  if (server === undefined) {
+    server = net.createServer((socket) => {
+      // new client
+      mainWindow?.webContents.send('system-message', {
+        time: moment().toDate(),
+        messgae: '(tcp server) new client is connect',
+        level: ActionEnum.Info,
+      } as ILog);
+
+      socket.setEncoding('utf8');
+
+      socket.on('data', async (data) => {
+        mainWindow?.webContents.send('system-message', {
+          time: moment().toDate(),
+          messgae: `(tcp server) Received data from client: ${data}`,
+          level: ActionEnum.Info,
+        } as ILog);
+
+        if (data.toString().trim() === 'hello') {
+          socket.write("what's your name?");
+
+          const clientName = await new Promise((resolve) => {
+            socket.once('data', resolve);
+          });
+
+          const name = (clientName as Buffer).toString().trim();
+          socket.write(`Hello ${name}`);
+
+          mainWindow?.webContents.send('system-message', {
+            time: moment().toDate(),
+            messgae: `(tcp server) get client name: ${name}`,
+            level: ActionEnum.Info,
+          } as ILog);
+        }
+      });
+
+      socket.on('close', () => {
+        console.log('Client disconnected');
+        mainWindow?.webContents.send('system-message', {
+          time: moment().toDate(),
+          messgae: `(tcp server) Client disconnected`,
+          level: ActionEnum.Info,
+        } as ILog);
+      });
+    });
+
+    const port = 19999;
+    server.listen(port, () => {
+      mainWindow?.webContents.send('system-message', {
+        time: moment().toDate(),
+        messgae: `(tcp server) Server listening on port ${port}`,
+        level: ActionEnum.Success,
+      } as ILog);
+    });
+  }
+
+  // test sys log
+  setInterval(() => {
+    mainWindow?.webContents.send('system-message', {
+      time: moment().toDate(),
+      messgae: `Test`,
+      level: ActionEnum.Info,
+    } as ILog);
+  }, 0.5 * 1000);
+});
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even

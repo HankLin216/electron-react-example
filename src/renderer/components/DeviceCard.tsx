@@ -4,15 +4,20 @@ import Box from '@mui/material/Box';
 import { grey } from '@mui/material/colors';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Unstable_Grid2';
-import { ActionEnum } from 'renderer/enum/Action';
-import { IDeviceCardInfo } from 'renderer/types/Device';
-import { useSetRecoilState } from 'recoil';
-import OverviewState from 'renderer/states/OverViewState';
-import IOverviewState from 'renderer/types/Overview';
+import { useSetRecoilState, useRecoilCallback } from 'recoil';
+import OverviewState from 'states/OverviewState';
+import { ActionEnum } from '../../enum/Action';
+import { IDeviceCardInfo } from '../../types/Device';
+import IOverviewState from '../../types/Overview';
 import { getActionColor } from '../utils/ColorHandler';
 
 export default function DeviceCard(props: { deviceCardInfo: IDeviceCardInfo }) {
   const setOverviewState = useSetRecoilState<IOverviewState>(OverviewState);
+  const getOverviewState = useRecoilCallback(
+    ({ snapshot: { getLoadable } }) =>
+      () =>
+        getLoadable(OverviewState).getValue()
+  );
   const { deviceCardInfo } = props;
   const actionColor = getActionColor(ActionEnum.Info);
 
@@ -25,11 +30,16 @@ export default function DeviceCard(props: { deviceCardInfo: IDeviceCardInfo }) {
   return (
     <Paper
       elevation={5}
-      onClick={() =>
-        setOverviewState({
-          activateCardControllerID: deviceCardInfo.controllerID,
-        })
-      }
+      onClick={() => {
+        if (
+          getOverviewState().activateCardControllerID !==
+          deviceCardInfo.controllerID
+        ) {
+          setOverviewState({
+            activateCardControllerID: deviceCardInfo.controllerID,
+          });
+        }
+      }}
       square
       sx={{
         background: `linear-gradient(45deg,${getBgColorList(

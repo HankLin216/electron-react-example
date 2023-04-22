@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { ToolEnum } from 'renderer/enum/Tool';
+import { ToolEnum } from '../enum/Tool';
 
 interface IDeviceDetail {
   tool: ToolEnum;
@@ -20,6 +20,8 @@ interface IDevice {
   status: string;
   tester: string;
   capacity: string;
+  fwVersion: string;
+  fwMinor: string;
   feature: string;
   extensionInfo: IDeviceDetail;
 }

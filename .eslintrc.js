@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['erb'],
+  extends: ['erb', 'prettier'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
@@ -10,6 +10,7 @@ module.exports = {
     'import/no-import-module-exports': 'off',
     'react/destructuring-assignment': 'off',
   },
+  plugins: ['prettier'],
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
